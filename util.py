@@ -5,6 +5,7 @@ import csv
 import logging
 import sys
 from datetime import datetime
+from os import path
 
 import requests
 from bs4 import BeautifulSoup
@@ -26,16 +27,24 @@ def price_tracker():
     """
     Get the price and write it in price_tracker.csv.
     """
+    # add header if the file is not exist
+    get_yesterday_price()
+
+    if not path.exists("price_tracker.csv"):
+        with open("price_tracker.csv", "a") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Date", "Brand", "Price"])
+
     date = datetime.now().strftime("%Y-%m-%d")
     for brand, url in tv.items():
-        data = [date, brand, get_price(url)]
+        data = [date, brand, get_current_price(url)]
         logging.info(data)
         with open("price_tracker.csv", "a") as file:
             writer = csv.writer(file)
             writer.writerow(data)
 
 
-def get_price(url):
+def get_current_price(url):
     """
     Get the price from the Coolblue page.
     :param url: str
@@ -70,3 +79,14 @@ def parse(html):
     element = soup.find("strong", class_=find_class)
     logging.debug(f"Get element of class '{find_class}'")
     return element.get_text().split(",")[0]
+
+
+def get_yesterday_price():
+    """
+    Get the price of yesterday from price_tracker.csv.
+    """
+    if path.exists("price_tracker.csv"):
+        with open("price_tracker.csv", "r") as file:
+            lines = file.readlines()
+        logging.info(lines[-2].split("\n")[0].split(","))
+        logging.info(lines[-1].split("\n")[0].split(","))
