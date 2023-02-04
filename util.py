@@ -20,7 +20,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler(f"{current_path}price_tracker.log"),
+        logging.FileHandler(f"{current_path}/price_tracker.log"),
         logging.StreamHandler(stream=sys.stdout)
     ]
 )
