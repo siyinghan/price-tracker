@@ -9,9 +9,12 @@ from os import path
 
 import requests
 from bs4 import BeautifulSoup
+from pathlib import Path
 
 tv = {"SONY": "https://www.coolblue.nl/en/product/906254/sony-bravia-oled-xr-77a80k-2022.html",
       "LG": "https://www.coolblue.nl/en/product/903398/lg-oled77c24la-2022.html"}
+
+current_path = Path(__file__).parent.absolute()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -31,7 +34,7 @@ def price_tracker():
     get_yesterday_price()
 
     if not path.exists("price_tracker.csv"):
-        with open("price_tracker.csv", "a") as file:
+        with open(f"{current_path}/price_tracker.csv", "a") as file:
             writer = csv.writer(file)
             writer.writerow(["Date", "Brand", "Price"])
 
@@ -39,7 +42,7 @@ def price_tracker():
     for brand, url in tv.items():
         data = [date, brand, get_current_price(url)]
         logging.info(data)
-        with open("price_tracker.csv", "a") as file:
+        with open(f"{current_path}/price_tracker.csv", "a") as file:
             writer = csv.writer(file)
             writer.writerow(data)
 
@@ -85,8 +88,8 @@ def get_yesterday_price():
     """
     Get the price of yesterday from price_tracker.csv.
     """
-    if path.exists("price_tracker.csv"):
-        with open("price_tracker.csv", "r") as file:
+    if path.exists(f"{current_path}/price_tracker.csv"):
+        with open(f"{current_path}/price_tracker.csv", "r") as file:
             lines = file.readlines()
         logging.info(lines[-2].split("\n")[0].split(","))
         logging.info(lines[-1].split("\n")[0].split(","))
