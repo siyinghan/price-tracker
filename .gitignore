@@ -1,0 +1,8 @@
+# system files
+.DS_Store
+
+# IntelliJ IDEA
+.idea
+
+*.csv
+*.log
