@@ -1,7 +1,7 @@
 """
 Price Tracker.
 """
-from util import price_tracker
+from util import PriceTracker
 
 if __name__ == "__main__":
-    price_tracker()
+    PriceTracker("local").create_dict_to_db()
