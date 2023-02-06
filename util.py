@@ -127,15 +127,17 @@ class PriceTracker:
                 self.item_name_list.append(columns[index][0])
         # get yesterday price
         self.cur.execute("SELECT * FROM price ORDER BY id DESC LIMIT 1")
-        data = self.cur.fetchall()[0]
-        date = data[1]
-        for index in range(len(data)):
-            if index == 0:
-                self.last_index = index
-            elif index > 1:
-                price_list.append(data[index])
-        self.yesterday_price = dict(zip(self.item_name_list, price_list))
-        logging.debug("Get the prices of yesterday")
+        try:
+            data = self.cur.fetchall()[0]
+            for index in range(len(data)):
+                if index == 0:
+                    self.last_index = index
+                elif index > 1:
+                    price_list.append(data[index])
+            self.yesterday_price = dict(zip(self.item_name_list, price_list))
+            logging.debug("Get the prices of yesterday")
+        except IndexError as _:
+            logging.error("No prices of yesterday")
 
     def get_current_price(self):
         """
