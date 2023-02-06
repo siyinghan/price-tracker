@@ -31,10 +31,6 @@ CREATE TABLE `item_info` (
 CREATE TABLE `price` (
   `id` int(4) NOT NULL AUTO_INCREMENT,
   `date` varchar(10) DEFAULT NULL,
-  `SONY-XR-77A80K` varchar(10) DEFAULT NULL,
-  `LG-OLED77C24LA` varchar(10) DEFAULT NULL,
-  `Nespresso-SNE500BKS` varchar(10) DEFAULT NULL,
-  `Samsung-RS66A8101B1/EF` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
