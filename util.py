@@ -1,9 +1,9 @@
 """
-Get prices from the website and save them to a CSV file.
+Get prices from the website and save them to the database.
 """
 import logging
 import sys
-from datetime import datetime
+import time
 
 import requests
 import yaml
@@ -34,11 +34,11 @@ def craw(url):
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/109.0.0.0 Safari/537.36"}
     response = requests.get(url, headers=headers)
-    logging.debug(f"Get response from {url}")
+    logging.info(f"Get response from {url}")
     return response.text
 
 
-def parse(html):
+def parse1(html):
     """
     Get the price of the page text.
     :param html: str
@@ -46,40 +46,45 @@ def parse(html):
     """
     find_class = "sales-price__current"
     soup = BeautifulSoup(html, "html.parser")
-    element = soup.find("strong", class_=find_class)
+    element = soup.findAll("strong", class_=find_class)
     logging.debug(f"Get element of class '{find_class}'")
-    return element.get_text().split(",")[0]
+    return element[0].get_text().split(",")[0]
+
+
+def parse2(html):
+    """
+    Get the price of the page text.
+    :param html: str
+    :return: str
+    """
+    find_class = "sales-price__current"
+    soup = BeautifulSoup(html, "html.parser")
+    element = soup.findAll("strong", class_=find_class)
+    logging.debug(f"Get element of class '{find_class}'")
+    return element[1].get_text().split(",")[0]
 
 
 class PriceTracker:
+    """
+    Get prices from the website and save them to the database.
+    """
     def __init__(self, location):
         self.location = location
         self.cnx = None
         self.cur = None
         self.last_index = None
+        self.yesterday_price = dict()
         self.item_url_info = dict()
         self.item_name_list = list()
         self.connect_to_db()
 
-    # def price_tracker():
-    #     """
-    #     Get the price and write it in price_tracker.csv.
-    #     """
-    #     # add header if the file is not exist
-    #     get_yesterday_price()
-    # 
-    #     if not path.exists("price_tracker.csv"):
-    #         with open(f"{current_path}/price_tracker.csv", "a") as file:
-    #             writer = csv.writer(file)
-    #             writer.writerow(["Date", "Brand", "Price"])
-    # 
-    #     date = datetime.now().strftime("%Y-%m-%d")
-    #     for brand, url in tv.items():
-    #         data = [date, brand, get_current_price(url)]
-    #         logging.info(data)
-    #         with open(f"{current_path}/price_tracker.csv", "a") as file:
-    #             writer = csv.writer(file)
-    #             writer.writerow(data)
+    def run(self):
+        """
+        Run PriceTracker.
+        """
+        # add header if the file is not exist
+        self.get_yesterday_price()
+        self.get_current_price()
 
     def read_db_conf(self):
         """
@@ -111,7 +116,7 @@ class PriceTracker:
 
     def get_yesterday_price(self):
         """
-        Get the price of yesterday from the database.
+        Get the prices of yesterday from the database.
         """
         price_list = list()
         # get items name
@@ -129,21 +134,32 @@ class PriceTracker:
                 self.last_index = index
             elif index > 1:
                 price_list.append(data[index])
-        logging.info(f"{date} {dict(zip(self.item_name_list, price_list))}")
+        self.yesterday_price = dict(zip(self.item_name_list, price_list))
+        logging.debug("Get the prices of yesterday")
 
-    def create_dict_to_db(self):
+    def get_current_price(self):
+        """
+        Get the prices from the pages and save them to the database.
+        """
         price_dict = {}
-        date = datetime.now().strftime("%Y-%m-%d")
+        date = time.strftime("%Y-%m-%d")
         self.get_item_and_url()
         for item, url in self.item_url_info.items():
-            price_dict[item] = parse(craw(url))
-        logging.info(f"{date} {price_dict}")
+            if item != "Nespresso-SNE500BKS":
+                price_dict[item] = parse1(craw(url))
+            else:
+                price_dict[item] = parse2(craw(url))
+        logging.debug("Get the prices of today")
+        logging.info(f"today {date} {price_dict}")
         price_dict["date"] = date
         columns = "`, `".join(price_dict.keys())
         columns = f"`{columns}`"
-        values = ", ".join(price_dict.values())
+        values = "', '".join(price_dict.values())
+        values = f"'{values}'"
+        print(values)
         self.cur.execute(f"INSERT INTO test ({columns}) VALUES ({values})")
         self.cnx.commit()
+        logging.info(f"yesterday {date} {self.yesterday_price}")
 
     def __del__(self):
         self.cnx.close()
