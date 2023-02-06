@@ -11,7 +11,7 @@ $ python main.py
 
 ## MySQL table
 
-item_info
+**item_info**
 
 ```mysql
 CREATE TABLE `item_info` (
@@ -25,7 +25,7 @@ CREATE TABLE `item_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
-price
+**price**
 
 ```mysql
 CREATE TABLE `price` (
