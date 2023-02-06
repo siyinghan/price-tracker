@@ -120,13 +120,13 @@ class PriceTracker:
         """
         price_list = list()
         # get items name
-        self.cur.execute("SHOW COLUMNS FROM test")
+        self.cur.execute("SHOW COLUMNS FROM price")
         columns = self.cur.fetchall()
         for index in range(len(columns)):
             if index > 1:
                 self.item_name_list.append(columns[index][0])
         # get yesterday price
-        self.cur.execute("SELECT * FROM test ORDER BY id DESC LIMIT 1")
+        self.cur.execute("SELECT * FROM price ORDER BY id DESC LIMIT 1")
         data = self.cur.fetchall()[0]
         date = data[1]
         for index in range(len(data)):
@@ -157,7 +157,7 @@ class PriceTracker:
         values = "', '".join(price_dict.values())
         values = f"'{values}'"
         print(values)
-        self.cur.execute(f"INSERT INTO test ({columns}) VALUES ({values})")
+        self.cur.execute(f"INSERT INTO price ({columns}) VALUES ({values})")
         self.cnx.commit()
         logging.info(f"yesterday {date} {self.yesterday_price}")
 
