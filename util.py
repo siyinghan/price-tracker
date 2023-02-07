@@ -15,7 +15,7 @@ from mysql.connector import connection
 current_path = Path(__file__).parent.absolute()
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(f"{current_path}/price_tracker.log"),
@@ -68,6 +68,7 @@ class PriceTracker:
     """
     Get prices from the website and save them to the database.
     """
+
     def __init__(self, location):
         self.location = location
         self.cnx = None
@@ -153,6 +154,7 @@ class PriceTracker:
                 price_dict[item] = parse2(craw(url))
         logging.debug("Get the prices of today")
         logging.info(f"{date} {price_dict}")
+        print(f"{date} {price_dict}")
         price_dict["date"] = date
         columns = "`, `".join(price_dict.keys())
         columns = f"`{columns}`"
@@ -161,6 +163,7 @@ class PriceTracker:
         self.cur.execute(f"INSERT INTO price ({columns}) VALUES ({values})")
         self.cnx.commit()
         logging.info(f"{date} {self.yesterday_price}")
+        print(f"{date} {self.yesterday_price}")
 
     def __del__(self):
         self.cnx.close()
