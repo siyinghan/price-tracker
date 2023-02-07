@@ -152,16 +152,15 @@ class PriceTracker:
             else:
                 price_dict[item] = parse2(craw(url))
         logging.debug("Get the prices of today")
-        logging.info(f"today {date} {price_dict}")
+        logging.info(f"{date} {price_dict}")
         price_dict["date"] = date
         columns = "`, `".join(price_dict.keys())
         columns = f"`{columns}`"
         values = "', '".join(price_dict.values())
         values = f"'{values}'"
-        print(values)
         self.cur.execute(f"INSERT INTO price ({columns}) VALUES ({values})")
         self.cnx.commit()
-        logging.info(f"yesterday {date} {self.yesterday_price}")
+        logging.info(f"{date} {self.yesterday_price}")
 
     def __del__(self):
         self.cnx.close()
