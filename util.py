@@ -3,7 +3,7 @@ Get prices from the website and save them to the database.
 """
 import logging
 import sys
-import time
+import datetime
 
 import requests
 import yaml
@@ -145,7 +145,8 @@ class PriceTracker:
         Get the prices from the pages and save them to the database.
         """
         price_dict = {}
-        date = time.strftime("%Y-%m-%d")
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         self.get_item_and_url()
         for item, url in self.item_url_info.items():
             if item != "Nespresso-SNE500BKS":
@@ -153,17 +154,17 @@ class PriceTracker:
             else:
                 price_dict[item] = parse2(craw(url))
         logging.debug("Get the prices of today")
-        logging.info(f"{date} {price_dict}")
-        print(f"{date} {price_dict}")
-        price_dict["date"] = date
+        logging.info(f"{today} {price_dict}")
+        print(f"{today} {price_dict}")
+        price_dict["date"] = today
         columns = "`, `".join(price_dict.keys())
         columns = f"`{columns}`"
         values = "', '".join(price_dict.values())
         values = f"'{values}'"
         self.cur.execute(f"INSERT INTO price ({columns}) VALUES ({values})")
         self.cnx.commit()
-        logging.info(f"{date} {self.yesterday_price}")
-        print(f"{date} {self.yesterday_price}")
+        logging.info(f"{yesterday} {self.yesterday_price}")
+        print(f"{yesterday} {self.yesterday_price}")
 
     def __del__(self):
         self.cnx.close()
